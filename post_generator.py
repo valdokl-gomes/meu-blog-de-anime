@@ -1,13 +1,16 @@
 import os
-from google import genai
+import google.generativeai as genai
 import feedparser
 from datetime import datetime
 
-# Configuração do Cliente
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+# Configuração usando a biblioteca estável
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+# Seleção do modelo
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Fonte de Notícias
-feed_url = "https://www.animenewsnetwork.com/news/rss.xml?ann-edition=w"
+feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
 feed = feedparser.parse(feed_url)
 
 if len(feed.entries) > 0:
@@ -15,35 +18,29 @@ if len(feed.entries) > 0:
     title = entry.title
     link = entry.link
     
-    print(f"Lendo notícia: {title}")
+    print(f"Processando: {title}")
 
-    prompt = f"Escreva um post de blog em Português sobre o anime: {title}. Fonte: {link}. Use Markdown."
+    prompt = f"Escreva um post curto de blog em Português sobre: {title}. Fonte: {link}. Use Markdown."
 
     try:
-        # Trocando para o modelo PRO que tem endpoints mais estáveis
-        response = client.models.generate_content(
-            model="gemini-1.5-pro", 
-            contents=prompt
-        )
+        # Gerando o conteúdo
+        response = model.generate_content(prompt)
         
-        if not response.text:
-            print("Erro: Resposta vazia.")
-            exit(1)
-
+        # Pasta de destino
         os.makedirs("content/posts", exist_ok=True)
         
-        clean_title = "".join(x for x in title if x.isalnum() or x==' ')[:30].replace(' ', '_')
-        filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}_{clean_title}.md"
+        # Nome do arquivo seguro
+        filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
         metadata = f"---\ntitle: \"{title}\"\ndate: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\ndraft: false\n---\n\n"
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + response.text)
         
-        print(f"✅ Sucesso total! Post criado.")
+        print("✅ Post gerado com sucesso!")
 
     except Exception as e:
-        print(f"❌ Erro crítico: {e}")
+        print(f"❌ Erro na API: {e}")
         exit(1)
 else:
     print("Feed vazio.")
