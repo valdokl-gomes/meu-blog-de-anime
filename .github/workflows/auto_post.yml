@@ -14,17 +14,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
       - name: Install dependencies
-        run: pip install google-generativeai feedparser # Voltamos para a estável
+        run: pip install groq feedparser # Instalando a Groq aqui
       - name: Run Generator
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Mantemos o nome do Secret
         run: python post_generator.py
       - name: Commit and Push
         run: |
           git config --global user.name "AutoBot"
           git config --global user.email "bot@github.com"
           git add .
-          git commit -m "Novo post automático de anime" || exit 0
+          git commit -m "Novo post automático via Groq" || exit 0
           git push
