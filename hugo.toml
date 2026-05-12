@@ -1,4 +1,4 @@
 baseURL = 'https://valdokl-gomes.github.io/meu-blog-de-anime/'
 languageCode = 'pt-br'
-title = 'Anime News AI'
-theme = 'ananke' # Vamos usar esse tema padrão para começar
+title = 'Meu Blog de Anime'
+theme = 'ananke' # Ou o nome do tema que você baixou
