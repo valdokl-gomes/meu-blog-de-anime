@@ -1,10 +1,10 @@
 import os
-import google.generativeai as genai
 import feedparser
 from datetime import datetime
+from groq import Groq
 
-# Configuração forçando a versão estável
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+# Configuração da Groq (Usando o Secret que você já tem)
+client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # Fonte de Notícias
 feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
@@ -15,38 +15,34 @@ if len(feed.entries) > 0:
     title = entry.title
     link = entry.link
     
-    print(f"Processando: {title}")
-
-    # Seleção do modelo com o caminho completo
-    # Usamos o 1.5-flash que é o mais rápido
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
-
-    prompt = f"Escreva um post curto de blog em Português sobre: {title}. Fonte: {link}. Use Markdown."
+    print(f"Processando com Groq: {title}")
 
     try:
-        # Gerando o conteúdo
-        response = model.generate_content(prompt)
+        # Chamada para o modelo Llama 3 (muito bom para português)
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Escreva um post de blog curto em Português sobre: {title}. Fonte: {link}. Use Markdown.",
+                }
+            ],
+            model="llama-3.3-70b-versatile", # Modelo potente e grátis
+        )
         
-        # Se a resposta falhou ou foi bloqueada
-        if not response.text:
-            print("IA não gerou texto (pode ser filtro de segurança).")
-            exit(1)
+        conteudo = chat_completion.choices[0].message.content
 
         os.makedirs("content/posts", exist_ok=True)
-        
-        # Nome do arquivo simples
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
         metadata = f"---\ntitle: \"{title}\"\ndate: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\ndraft: false\n---\n\n"
         
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(metadata + response.text)
+            f.write(metadata + conteudo)
         
-        print("✅ SUCESSO! Post gerado.")
+        print("✅ SUCESSO com Groq!")
 
     except Exception as e:
-        # Se der erro 404 de novo, vamos tentar listar os modelos para debug
-        print(f"❌ Erro: {e}")
+        print(f"❌ Erro na Groq: {e}")
         exit(1)
 else:
     print("Feed vazio.")
