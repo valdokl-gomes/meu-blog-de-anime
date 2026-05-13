@@ -1,7 +1,7 @@
 baseURL = 'https://valdokl-gomes.github.io/meu-blog-de-anime/'
-languageCode = 'pt-br'
+defaultContentLanguage = 'pt-br'
 title = 'Meu Blog de Anime'
-theme = 'ananke' # Ou o nome do tema que você baixou
+theme = 'ananke'
 
 [params]
   disqusShortname = 'seu-nome-do-disqus'
