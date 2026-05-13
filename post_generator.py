@@ -69,29 +69,29 @@ if len(feed.entries) > 0:
         exit(1)
 # Gerar ID aleatório para a imagem
         img_id = random.randint(1, 5000)
-        image_url = f"https://picsum.photos/seed/{img_id}/1200/600"
+        image_url = f"https://picsum.photos/seed/{img_id}/1600/900"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # Metadata reforçado
+        # 1. Montamos o cabeçalho (Front Matter)
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
             f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\n"
             f"featured_image: \"{image_url}\"\n"
-            f"images: [\"{image_url}\"]\n"
             f"draft: false\n"
             f"---\n\n"
         )
         
-        # FORÇAR A IMAGEM NO CORPO (Markdown + HTML de backup)
-        # Se o Hugo limpar um, o outro deve sobrar
-        imagem_markdown = f"![Destaque]({image_url})\n\n"
-        imagem_html = f'<img src="{image_url}" alt="Destaque" style="width:100%; border-radius:8px;">\n\n'
+        # 2. Criamos a linha da imagem em Markdown para o corpo do post
+        # IMPORTANTE: Esta linha PRECISA estar aqui para a imagem aparecer na página
+        imagem_no_corpo = f"![Imagem de Destaque]({image_url})\n\n"
+        
+        # 3. Juntamos TUDO: Cabeçalho + Imagem + Texto da IA
+        conteudo_final = metadata + imagem_no_corpo + conteudo
         
         with open(filename, "w", encoding="utf-8") as f:
-            # Gravamos os metadados + as duas formas de imagem + o texto da IA
-            f.write(metadata + imagem_markdown + imagem_html + conteudo)
+            f.write(conteudo_final)
         
-        print(f"✅ SUCESSO! Ficheiro criado com links de imagem.")
+        print(f"✅ SUCESSO! Post gerado com imagem no corpo.")
