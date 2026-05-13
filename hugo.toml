@@ -2,16 +2,12 @@ baseURL = 'https://valdokl-gomes.github.io/meu-blog-de-anime/'
 defaultContentLanguage = 'pt-br'
 title = 'Meu Blog de Anime'
 theme = 'ananke'
-[params]
-  # Força o tema a aceitar links externos como imagens de destaque
-  featured_image = "" 
-  # Se houver uma seção [markup], garanta que ela permita HTML nas imagens
-[markup.goldmark.renderer]
-  unsafe = true
-[markup]
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true # Isso permite que o <img src> apareça
 
 [params]
   featured_image = ""
+  disqusShortname = 'seu-nome-do-disqus'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
