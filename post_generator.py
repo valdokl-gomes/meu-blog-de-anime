@@ -67,30 +67,25 @@ if len(feed.entries) > 0:
     except Exception as e:
         print(f"❌ Erro: {e}")
         exit(1)
-# Gerar um ID aleatório para a imagem
+# Gerar ID aleatório
         img_id = random.randint(1, 5000)
         image_url = f"https://picsum.photos/seed/{img_id}/1200/600"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # Metadata - Note que as aspas na URL são importantes!
+        # Metadata
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
             f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\n"
             f"featured_image: \"{image_url}\"\n"
-            f"images: [\"{image_url}\"]\n"
             f"draft: false\n"
             f"---\n\n"
         )
         
-        # Colocamos a imagem em Markdown puro E em HTML para garantir
-        corpo_com_imagem = f"![Imagem de Destaque]({image_url})\n\n" + conteudo
+        # IMAGEM DIRETA (Markdown Puro) - Colocamos uma legenda para forçar o Hugo a renderizar
+        corpo_com_imagem = f"![Destaque da Notícia]({image_url})\n\n" + conteudo
         
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(metadata + corpo_com_imagem)
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(metadata + corpo_com_imagem)
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + corpo_com_imagem)
