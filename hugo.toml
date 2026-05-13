@@ -3,5 +3,8 @@ defaultContentLanguage = 'pt-br'
 title = 'Meu Blog de Anime'
 theme = 'ananke'
 [params]
-  # Isso permite que o tema use imagens de outros sites (como o Picsum ou Unsplash)
-  featured_image = ""
+  # Força o tema a aceitar links externos como imagens de destaque
+  featured_image = "" 
+  # Se houver uma seção [markup], garanta que ela permita HTML nas imagens
+[markup.goldmark.renderer]
+  unsafe = true
