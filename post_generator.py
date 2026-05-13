@@ -67,28 +67,28 @@ if len(feed.entries) > 0:
     except Exception as e:
         print(f"❌ Erro: {e}")
         exit(1)
-# ... (resto do seu código acima igual)
-
-        # Link da imagem (Picsum é o mais estável para testes)
-        img_id = random.randint(1, 1000)
-        image_url = f"https://picsum.photos/seed/{img_id}/1600/900"
+# Gerar um ID aleatório para a imagem sempre mudar
+        img_id = random.randint(1, 5000)
+        image_url = f"https://picsum.photos/seed/{img_id}/1200/600"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # Metadata reforçado
+        # Metadata com 'featured_image' e 'images' para garantir compatibilidade
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
             f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\n"
-            f"featured_image: \"{image_url}\"\n" # Para o banner do topo
-            f"images: [\"{image_url}\"]\n"      # Backup para outros temas
+            f"featured_image: {image_url}\n"
+            f"images: [\"{image_url}\"]\n"
             f"draft: false\n"
             f"---\n\n"
         )
         
-        # Adicionamos a imagem no início do conteúdo para garantir que ela apareça
-        corpo_com_imagem = f"![Imagem de destaque]({image_url})\n\n" + conteudo
+        # Colocamos a imagem LOGO NO INÍCIO do texto com HTML para não ter erro de renderização
+        corpo_com_imagem = f'<img src="{image_url}" alt="Destaque" style="width:100%; border-radius:8px;">\n\n' + conteudo
         
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(metadata + corpo_com_imagem)
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + corpo_com_imagem)
