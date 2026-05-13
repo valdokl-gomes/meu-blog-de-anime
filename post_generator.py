@@ -74,7 +74,7 @@ if len(feed.entries) > 0:
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # 1. Montamos o cabeçalho (Front Matter)
+        # 1. Cabeçalho
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
@@ -84,14 +84,14 @@ if len(feed.entries) > 0:
             f"---\n\n"
         )
         
-        # 2. Criamos a linha da imagem em Markdown para o corpo do post
-        # IMPORTANTE: Esta linha PRECISA estar aqui para a imagem aparecer na página
-        imagem_no_corpo = f"![Imagem de Destaque]({image_url})\n\n"
+        # 2. Imagem (Markdown puro)
+        # Forçamos a variável imagem_fixa
+        imagem_fixa = f"![Notícia]({image_url})\n\n"
         
-        # 3. Juntamos TUDO: Cabeçalho + Imagem + Texto da IA
-        conteudo_final = metadata + imagem_no_corpo + conteudo
-        
+        # 3. Gravação direta para evitar erros de concatenação
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(conteudo_final)
+            f.write(metadata)
+            f.write(imagem_fixa)
+            f.write(conteudo)
         
-        print(f"✅ SUCESSO! Post gerado com imagem no corpo.")
+        print(f"✅ SUCESSO! A imagem deve aparecer agora.")
