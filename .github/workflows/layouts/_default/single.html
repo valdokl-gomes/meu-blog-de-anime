@@ -1,1 +1,17 @@
+{{ define "main" }}
+  <article class="pa3 pa4-ns nested-copy-line-height">
+    <header class="pv4">
+      <h1 class="f1 athelas mb1">{{ .Title }}</h1>
+      <time class="f6 mv4 dib tracked" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "January 2, 2006" }}</time>
+    </header>
+    
+    <section class="nested-copy-line-height clr-gray-700">
+      {{ .Content }}
+    </section>
 
+    <div class="mt5">
+      {{ template "_internal/disqus.html" . }}
+    </div>
+    
+  </article>
+{{ end }}
