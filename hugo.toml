@@ -8,3 +8,10 @@ theme = 'ananke'
   # Se houver uma seção [markup], garanta que ela permita HTML nas imagens
 [markup.goldmark.renderer]
   unsafe = true
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true # Isso permite que o <img src> apareça
+
+[params]
+  featured_image = ""
