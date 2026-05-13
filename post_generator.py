@@ -1,9 +1,10 @@
 import os
 import feedparser
+import re
 from datetime import datetime
 from groq import Groq
 
-# Configuração da Groq (Usando o Secret que você já tem)
+# Configuração da Groq
 client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # Fonte de Notícias
@@ -18,28 +19,50 @@ if len(feed.entries) > 0:
     print(f"Processando com Groq: {title}")
 
     try:
-        # Chamada para o modelo Llama 3 (muito bom para português)
+        # Prompt atualizado para incluir a imagem
+        prompt = f"""
+        Escreva um post de blog curto e entusiasmado em Português sobre a notícia: {title}. 
+        Fonte original: {link}. 
+        
+        REGRAS IMPORTANTES:
+        1. Use Markdown.
+        2. No final do texto, escolha UMA palavra-chave em inglês que defina o anime ou tema da notícia e escreva EXATAMENTE assim: KEYWORD: [palavra].
+        """
+
         chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Escreva um post de blog curto em Português sobre: {title}. Fonte: {link}. Use Markdown.",
-                }
-            ],
-            model="llama-3.3-70b-versatile", # Modelo potente e grátis
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
         )
         
-        conteudo = chat_completion.choices[0].message.content
+        resposta_completa = chat_completion.choices[0].message.content
+
+        # Extrair a palavra-chave para a imagem (ou usar 'anime' como padrão)
+        match = re.search(r"KEYWORD: (\w+)", resposta_completa)
+        keyword = match.group(1) if match else "anime"
+        
+        # Limpar o texto para não mostrar a palavra-chave no post
+        conteudo = re.sub(r"KEYWORD: \w+", "", resposta_completa).strip()
+
+        # Link da imagem dinâmica
+        image_url = f"https://source.unsplash.com/1600x900/?{keyword},anime"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        metadata = f"---\ntitle: \"{title}\"\ndate: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\ndraft: false\n---\n\n"
+        # Metadata com imagem destacada para o tema Ananke
+        metadata = (
+            f"---\n"
+            f"title: \"{title}\"\n"
+            f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\n"
+            f"featured_image: \"{image_url}\"\n"
+            f"draft: false\n"
+            f"---\n\n"
+        )
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + conteudo)
         
-        print("✅ SUCESSO com Groq!")
+        print(f"✅ SUCESSO! Imagem gerada para a categoria: {keyword}")
 
     except Exception as e:
         print(f"❌ Erro na Groq: {e}")
