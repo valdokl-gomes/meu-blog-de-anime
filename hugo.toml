@@ -2,3 +2,6 @@ baseURL = 'https://valdokl-gomes.github.io/meu-blog-de-anime/'
 defaultContentLanguage = 'pt-br'
 title = 'Meu Blog de Anime'
 theme = 'ananke'
+[params]
+  # Isso permite que o tema use imagens de outros sites (como o Picsum ou Unsplash)
+  featured_image = ""
