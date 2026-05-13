@@ -67,25 +67,31 @@ if len(feed.entries) > 0:
     except Exception as e:
         print(f"❌ Erro: {e}")
         exit(1)
-# Gerar ID aleatório
+# Gerar ID aleatório para a imagem
         img_id = random.randint(1, 5000)
         image_url = f"https://picsum.photos/seed/{img_id}/1200/600"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # Metadata
+        # Metadata reforçado
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
             f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S-03:00')}\n"
             f"featured_image: \"{image_url}\"\n"
+            f"images: [\"{image_url}\"]\n"
             f"draft: false\n"
             f"---\n\n"
         )
         
-        # IMAGEM DIRETA (Markdown Puro) - Colocamos uma legenda para forçar o Hugo a renderizar
-        corpo_com_imagem = f"![Destaque da Notícia]({image_url})\n\n" + conteudo
+        # FORÇAR A IMAGEM NO CORPO (Markdown + HTML de backup)
+        # Se o Hugo limpar um, o outro deve sobrar
+        imagem_markdown = f"![Destaque]({image_url})\n\n"
+        imagem_html = f'<img src="{image_url}" alt="Destaque" style="width:100%; border-radius:8px;">\n\n'
         
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(metadata + corpo_com_imagem)
+            # Gravamos os metadados + as duas formas de imagem + o texto da IA
+            f.write(metadata + imagem_markdown + imagem_html + conteudo)
+        
+        print(f"✅ SUCESSO! Ficheiro criado com links de imagem.")
