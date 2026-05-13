@@ -1,6 +1,7 @@
 import os
 import feedparser
 import re
+import random
 from datetime import datetime
 from groq import Groq
 
@@ -16,17 +17,13 @@ if len(feed.entries) > 0:
     title = entry.title
     link = entry.link
     
-    print(f"Processando com Groq: {title}")
+    print(f"Processando: {title}")
 
     try:
-        # Prompt atualizado para incluir a imagem
         prompt = f"""
-        Escreva um post de blog curto e entusiasmado em Português sobre a notícia: {title}. 
-        Fonte original: {link}. 
-        
-        REGRAS IMPORTANTES:
-        1. Use Markdown.
-        2. No final do texto, escolha UMA palavra-chave em inglês que defina o anime ou tema da notícia e escreva EXATAMENTE assim: KEYWORD: [palavra].
+        Escreva um post de blog curto em Português sobre: {title}. 
+        Fonte: {link}. Use Markdown.
+        No final, adicione apenas uma palavra-chave simples em inglês sobre o tema assim: KEYWORD: [palavra]
         """
 
         chat_completion = client.chat.completions.create(
@@ -34,22 +31,25 @@ if len(feed.entries) > 0:
             model="llama-3.3-70b-versatile",
         )
         
-        resposta_completa = chat_completion.choices[0].message.content
+        resposta = chat_completion.choices[0].message.content
 
-        # Extrair a palavra-chave para a imagem (ou usar 'anime' como padrão)
-        match = re.search(r"KEYWORD: (\w+)", resposta_completa)
+        # Extrair palavra-chave e limpar o texto
+        match = re.search(r"KEYWORD:\s*(\w+)", resposta)
         keyword = match.group(1) if match else "anime"
-        
-        # Limpar o texto para não mostrar a palavra-chave no post
-        conteudo = re.sub(r"KEYWORD: \w+", "", resposta_completa).strip()
+        conteudo = re.sub(r"KEYWORD:.*", "", resposta).strip()
 
-        # Link da imagem dinâmica
-        image_url = f"https://source.unsplash.com/1600x900/?{keyword},anime"
+        # Gerador de link de imagem aleatória com base no tema (Picsum ou Unsplash)
+        # Usamos um ID aleatório para a imagem não ser sempre a mesma
+        img_id = random.randint(1, 1000)
+        image_url = f"https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&w=1600&q=80" 
+        # Nota: O link acima é uma imagem padrão de anime de alta qualidade. 
+        # Se quiser algo dinâmico que sempre mude:
+        image_url = f"https://picsum.photos/seed/{img_id}/1600/900"
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/{datetime.now().strftime('%Y%m%d_%H%M')}.md"
         
-        # Metadata com imagem destacada para o tema Ananke
+        # O segredo para o tema Ananke: featured_image
         metadata = (
             f"---\n"
             f"title: \"{title}\"\n"
@@ -62,11 +62,8 @@ if len(feed.entries) > 0:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + conteudo)
         
-        print(f"✅ SUCESSO! Imagem gerada para a categoria: {keyword}")
+        print("✅ Sucesso!")
 
     except Exception as e:
-        print(f"❌ Erro na Groq: {e}")
+        print(f"❌ Erro: {e}")
         exit(1)
-else:
-    print("Feed vazio.")
-    exit(1)
