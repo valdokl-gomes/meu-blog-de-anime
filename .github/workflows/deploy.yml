@@ -3,6 +3,10 @@ name: Deploy Hugo site to Pages
 on:
   push:
     branches: ["main"]
+  workflow_run:
+    workflows: ["Auto Post Anime News"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -21,15 +25,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          fetch-depth: 0
+          submodules: recursive  # Baixa o tema automaticamente
+          fetch-depth: 0        # Garante que pegue todo o histórico
+
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
           extended: true
+
       - name: Build
         run: hugo --minify
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
