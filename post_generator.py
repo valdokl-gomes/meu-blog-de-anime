@@ -11,8 +11,7 @@ client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
 feed = feedparser.parse(feed_url)
 
-# 3. LINK ABSOLUTO (Isto garante que a imagem carrega sempre)
-# Substituí pelo endereço real que o teu GitHub Pages usa
+# 3. LINK ABSOLUTO DA IMAGEM (O que funcionou!)
 base_url = "https://valdokl-gomes.github.io/meu-blog-de-anime"
 image_url = f"{base_url}/images/banner-anime.png"
 
@@ -38,17 +37,17 @@ for i in range(min(3, len(feed.entries))):
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/noticia_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.md"
         
-        # Metadata com link completo
+        # Metadata com 'comments = true'
         metadata = (
             f"---\n"
             f"title: \"{titulo_traduzido}\"\n"
             f"date: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}\n"
             f"featured_image: \"{image_url}\"\n"
+            f"comments: true\n"
             f"draft: false\n"
             f"---\n\n"
         )
         
-        # HTML com link completo (não falha nunca)
         imagem_html = f'<img src="{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
         
         with open(filename, "w", encoding="utf-8") as f:
