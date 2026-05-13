@@ -11,8 +11,10 @@ client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
 feed = feedparser.parse(feed_url)
 
-# 3. CAMINHO DA SUA IMAGEM (Relativo)
-image_url = "images/banner-anime.png"
+# 3. LINK ABSOLUTO (Isto garante que a imagem carrega sempre)
+# Substituí pelo endereço real que o teu GitHub Pages usa
+base_url = "https://valdokl-gomes.github.io/meu-blog-de-anime"
+image_url = f"{base_url}/images/banner-anime.png"
 
 for i in range(min(3, len(feed.entries))):
     entry = feed.entries[i]
@@ -36,6 +38,7 @@ for i in range(min(3, len(feed.entries))):
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/noticia_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.md"
         
+        # Metadata com link completo
         metadata = (
             f"---\n"
             f"title: \"{titulo_traduzido}\"\n"
@@ -45,12 +48,13 @@ for i in range(min(3, len(feed.entries))):
             f"---\n\n"
         )
         
-        imagem_html = f'<img src="../../{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
+        # HTML com link completo (não falha nunca)
+        imagem_html = f'<img src="{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + imagem_html + corpo_texto)
             
-        print(f"Sucesso no post {i}")
+        print(f"Post {i} criado com sucesso.")
 
     except Exception as e:
         print(f"Erro: {e}")
