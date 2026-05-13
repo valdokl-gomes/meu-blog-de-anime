@@ -12,8 +12,9 @@ client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
 feed = feedparser.parse(feed_url)
 
-# 3. CAMINHO DA SUA IMAGEM (Agora que está na pasta certa)
-image_url = "/images/banner-anime.png"
+# 3. CAMINHO DA SUA IMAGEM (Relativo para o GitHub Pages)
+# Note que removemos a barra "/" do início para o Hugo não se perder
+image_url = "images/banner-anime.png"
 
 for i in range(min(3, len(feed.entries))):
     entry = feed.entries[i]
@@ -39,14 +40,14 @@ for i in range(min(3, len(feed.entries))):
         resposta_ia = chat_completion.choices[0].message.content
         linhas = resposta_ia.strip().split('\n')
         
-        # Limpa o título de símbolos
+        # Limpa o título
         titulo_traduzido = re.sub(r'[#\*]', '', linhas[0]).strip()
         corpo_texto = '\n'.join(linhas[1:]).strip()
 
         os.makedirs("content/posts", exist_ok=True)
-        # Gerando nome de arquivo único com timestamp
         filename = f"content/posts/noticia_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.md"
         
+        # Metadata ajustado para o Hugo localizar a imagem na pasta static
         metadata = (
             f"---\n"
             f"title: \"{titulo_traduzido}\"\n"
@@ -56,13 +57,10 @@ for i in range(min(3, len(feed.entries))):
             f"---\n\n"
         )
         
-        # Inserindo a imagem via HTML para garantir que o tema Ananke mostre no corpo
-        imagem_html = f'<img src="{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
+        # HTML usando caminho relativo (../..) para sair da pasta 'posts' e achar 'images'
+        imagem_html = f'<img src="../../{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + imagem_html + corpo_texto)
             
-        print(f"✅ Notícia '{titulo_traduzido}' criada com sucesso!")
-
-    except Exception as e:
-        print(f"❌ Erro ao processar notícia {i}: {e}")
+        print(
