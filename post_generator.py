@@ -12,17 +12,15 @@ client = Groq(api_key=os.environ.get("GEMINI_API_KEY"))
 feed_url = "https://www.animenewsnetwork.com/news/rss.xml"
 feed = feedparser.parse(feed_url)
 
-# 3. LINK PERMANENTE (Imagem de alta qualidade que não expira)
-image_url = "https://wallpaperaccess.com/full/137326.jpg"
+# 3. CAMINHO DA SUA IMAGEM (Agora que está na pasta certa)
+image_url = "/images/banner-anime.png"
 
-# Vamos processar as 3 notícias mais recentes
 for i in range(min(3, len(feed.entries))):
     entry = feed.entries[i]
     original_title = entry.title
     link = entry.link
     
     try:
-        # Prompt para a IA traduzir o título e criar o resumo
         prompt = f"""
         Traduza o título para Português e escreva um post curto de blog.
         Título original em Inglês: {original_title}
@@ -41,14 +39,14 @@ for i in range(min(3, len(feed.entries))):
         resposta_ia = chat_completion.choices[0].message.content
         linhas = resposta_ia.strip().split('\n')
         
-        # Limpa o título (remove # ou *)
+        # Limpa o título de símbolos
         titulo_traduzido = re.sub(r'[#\*]', '', linhas[0]).strip()
         corpo_texto = '\n'.join(linhas[1:]).strip()
 
         os.makedirs("content/posts", exist_ok=True)
+        # Gerando nome de arquivo único com timestamp
         filename = f"content/posts/noticia_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.md"
         
-        # Cabeçalho do Hugo (Front Matter)
         metadata = (
             f"---\n"
             f"title: \"{titulo_traduzido}\"\n"
@@ -58,13 +56,13 @@ for i in range(min(3, len(feed.entries))):
             f"---\n\n"
         )
         
-        # HTML para garantir que a imagem aparece no corpo do texto
-        imagem_html = f'<img src="{image_url}" style="width:100%; border-radius:10px;"><br><br>\n\n'
+        # Inserindo a imagem via HTML para garantir que o tema Ananke mostre no corpo
+        imagem_html = f'<img src="{image_url}" alt="Banner Anime" style="width:100%; border-radius:12px;"><br><br>\n\n'
         
         with open(filename, "w", encoding="utf-8") as f:
             f.write(metadata + imagem_html + corpo_texto)
             
-        print(f"✅ Gerado: {titulo_traduzido}")
+        print(f"✅ Notícia '{titulo_traduzido}' criada com sucesso!")
 
     except Exception as e:
-        print(f"❌ Erro na notícia {i}: {e}")
+        print(f"❌ Erro ao processar notícia {i}: {e}")
