@@ -1,6 +1,7 @@
 import os
 import feedparser
 import random
+import re
 from datetime import datetime
 from groq import Groq
 
@@ -11,28 +12,23 @@ feed = feedparser.parse(feed_url)
 
 for i in range(min(3, len(feed.entries))):
     entry = feed.entries[i]
-    # Guardamos o título original em inglês
     original_title = entry.title
     link = entry.link
     
-    # 1. Ajuste da Imagem: Usamos palavras-chave de anime no Unsplash
-    # Isso aumenta muito a chance de vir algo relacionado a desenho/japão
-    img_id = random.randint(1, 1000)
-    image_url = f"https://source.unsplash.com/featured/1200x600?anime,manga,japan&sig={img_id}"
-    # Se o Source Unsplash falhar, esta é uma alternativa de anime estável:
-    # image_url = f"https://images.unsplash.com/photo-1578632292335-df3abbb0d586?auto=format&fit=crop&w=1200&q=80"
+    # Gerar ID aleatório para a imagem não repetir
+    img_id = random.randint(1, 5000)
+    # Picsum é muito mais estável que o Unsplash Source antigo
+    image_url = f"https://picsum.photos/seed/{img_id}/1200/600"
 
     try:
-        # 2. Novo Prompt: Agora pedimos para a IA traduzir o título também!
         prompt = f"""
-        Traduza o título e escreva um post curto em Português.
+        Traduza o título para Português e escreva um post curto sobre a notícia.
         Título original: {original_title}
-        Fonte: {link}
+        Link da fonte: {link}
         
         REGRAS:
-        1. A primeira linha da sua resposta deve ser o título traduzido.
-        2. A segunda linha deve ser o código: ![anime]({image_url})
-        3. O restante deve ser o corpo do texto em português.
+        1. A primeira linha deve ser apenas o TITULO TRADUZIDO.
+        2. O restante deve ser o corpo do texto em Português.
         """
 
         chat_completion = client.chat.completions.create(
@@ -41,11 +37,11 @@ for i in range(min(3, len(feed.entries))):
         )
         
         resposta_ia = chat_completion.choices[0].message.content
+        linhas = resposta_ia.strip().split('\n')
         
-        # Separar o título traduzido do resto do conteúdo
-        linhas = resposta_ia.split('\n')
-        titulo_traduzido = linhas[0].replace('#', '').strip() # Limpa possíveis títulos em Markdown
-        conteudo_ia = '\n'.join(linhas[1:])
+        # Pega a primeira linha como título e limpa caracteres de Markdown (# ou *)
+        titulo_traduzido = re.sub(r'[#\*]', '', linhas[0]).strip()
+        conteudo_ia = '\n'.join(linhas[1:]).strip()
 
         os.makedirs("content/posts", exist_ok=True)
         filename = f"content/posts/post_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.md"
@@ -59,10 +55,13 @@ for i in range(min(3, len(feed.entries))):
             f"---\n\n"
         )
         
+        # Colocamos a imagem com uma tag HTML simples para garantir que o Hugo não a bloqueie
+        corpo_final = f'<img src="{image_url}" alt="Anime News" style="width:100%; border-radius:8px;"><br>\n\n' + conteudo_ia
+        
         with open(filename, "w", encoding="utf-8") as f:
-            f.write(metadata + conteudo_ia)
+            f.write(metadata + corpo_final)
             
-        print(f"✅ Traduzido e Gerado: {titulo_traduzido}")
+        print(f"✅ Post gerado: {titulo_traduzido}")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"❌ Erro ao processar: {e}")
